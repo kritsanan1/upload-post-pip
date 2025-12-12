@@ -25,13 +25,36 @@ pip install upload-post
 
 ### Command Line Interface
 
+The CLI now supports three types of uploads: video, photos, and text posts.
+
+#### Video Upload
 ```bash
-upload-post \
+upload-post video \
   --api-key "your_api_key_here" \
   --video "/path/to/video.mp4" \
   --title "My Awesome Video" \
   --user "testuser" \
   --platforms tiktok instagram
+```
+
+#### Photos Upload
+```bash
+upload-post photos \
+  --api-key "your_api_key_here" \
+  --photos "/path/to/photo1.jpg" "/path/to/photo2.png" \
+  --title "My Photo Album" \
+  --caption "Check out these cool photos!" \
+  --user "testuser" \
+  --platforms instagram facebook
+```
+
+#### Text Post Upload
+```bash
+upload-post text \
+  --api-key "your_api_key_here" \
+  --title "This is my awesome text post! #Python #API" \
+  --user "testuser" \
+  --platforms x linkedin
 ```
 
 ### Python API

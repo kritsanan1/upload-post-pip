@@ -16,7 +16,7 @@ class UploadPostClient:
         self.session = requests.Session()
         self.session.headers.update({
             "Authorization": f"Apikey {self.api_key}",
-            "User-Agent": f"upload-post-python-client/0.1.0"
+            "User-Agent": f"upload-post-python-client/0.1.2"
         })
 
     def upload_video(
