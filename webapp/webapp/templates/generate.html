@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}AI Content Generator - Upload-Post AI WebApp{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-warning">
+                <i class="fas fa-magic"></i> AI Content Generator
+            </h2>
+            <p class="lead">Generate engaging content using Google Gemini AI</p>
+        </div>
+
+        {% if gemini_available %}
+        <div class="card">
+            <div class="card-body">
+                <form id="generateForm">
+                    <div class="mb-3">
+                        <label for="contentType" class="form-label">Content Type</label>
+                        <select class="form-select" id="contentType" name="type" required>
+                            <option value="post_caption">Social Media Caption</option>
+                            <option value="video_description">Video Description</option>
+                            <option value="content_ideas">Content Ideas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">What would you like to generate content about?</label>
+                        <textarea class="form-control" id="prompt" name="prompt" rows="3" 
+                                  placeholder="e.g., A travel vlog about Tokyo, a fitness motivation post, a tech review..." required></textarea>
+                        <div class="form-text">Be specific about your topic, target audience, and tone.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="fas fa-magic"></i> Generate Content
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="resultSection" class="mt-4" style="display: none;">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-robot"></i> AI Generated Content
+                </div>
+                <div class="card-body">
+                    <div id="generatedContent" class="mb-3"></div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard()">
+                            <i class="fas fa-copy"></i> Copy to Clipboard
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="useGeneratedContent()">
+                            <i class="fas fa-arrow-right"></i> Use This Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-lightbulb"></i> Tips for Better AI Content
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Be specific about your topic and target audience</li>
+                    <li>Mention the platform (TikTok, Instagram, etc.) for platform-specific content</li>
+                    <li>Include keywords you want to emphasize</li>
+                    <li>Specify the tone (professional, casual, funny, etc.)</li>
+                    <li>For content ideas, mention your niche or industry</li>
+                </ul>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Gemini AI Not Configured:</strong> AI content generation features are currently disabled.
+            <br>To enable AI features, set the <code>GEMINI_API_KEY</code> environment variable.
+        </div>
+        
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-3x text-muted mb-3"></i>
+                <h5>AI Features Disabled</h5>
+                <p>Contact the administrator to enable Gemini AI integration.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('generateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    generateContent();
+});
+
+function generateContent() {
+    const form = document.getElementById('generateForm');
+    const formData = new FormData(form);
+    const data = {
+        type: formData.get('type'),
+        prompt: formData.get('prompt')
+    };
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    submitBtn.disabled = true;
+    
+    fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        if (result.success) {
+            displayGeneratedContent(result.content);
+        } else {
+            alert('Generation failed: ' + (result.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        console.error('Generation error:', error);
+        alert('Generation failed: ' + error.message);
+    });
+}
+
+function displayGeneratedContent(content) {
+    const resultSection = document.getElementById('resultSection');
+    const generatedContent = document.getElementById('generatedContent');
+    
+    generatedContent.innerHTML = `<pre class="mb-0">${escapeHtml(content)}</pre>`;
+    resultSection.style.display = 'block';
+    
+    // Smooth scroll to result
+    resultSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyToClipboard() {
+    const content = document.querySelector('#generatedContent pre').textContent;
+    navigator.clipboard.writeText(content).then(function() {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Copy failed:', err);
+        alert('Failed to copy to clipboard');
+    });
+}
+
+function useGeneratedContent() {
+    const content = document.querySelector('#generatedContent pre').textContent;
+    
+    // Store in sessionStorage for use in upload page
+    sessionStorage.setItem('generatedContent', content);
+    
+    // Redirect to upload page
+    window.location.href = '{{ url_for("upload_page") }}';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

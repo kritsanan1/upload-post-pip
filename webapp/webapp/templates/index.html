@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Upload-Post AI WebApp{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-cloud-upload-alt"></i> Upload-Post AI WebApp
+            </h1>
+            <p class="lead">Upload content to multiple social media platforms with AI-powered content generation</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Video Upload</h5>
+                        <p class="card-text">Upload videos to TikTok, Instagram, YouTube, LinkedIn, and more platforms simultaneously.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-images fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Photo Upload</h5>
+                        <p class="card-text">Upload photos to multiple social media platforms with ease.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-edit fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Text Posts</h5>
+                        <p class="card-text">Create and publish text posts across LinkedIn, X (Twitter), Facebook, and Threads.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if gemini_available %}
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-2x text-warning mb-3"></i>
+                <h5>AI-Powered Content Generation</h5>
+                <p>Generate engaging descriptions, captions, and content ideas using Google Gemini AI.</p>
+                <a href="{{ url_for('generate_page') }}" class="btn btn-warning">
+                    <i class="fas fa-magic"></i> Try AI Generator
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-upload"></i> Start Uploading
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('generate_page') }}" class="btn btn-outline-primary btn-lg w-100">
+                    <i class="fas fa-lightbulb"></i> Generate Content
+                </a>
+            </div>
+        </div>
+
+        {% if not upload_available %}
+        <div class="alert alert-warning mt-4">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Upload Service Unavailable:</strong> Upload-Post API key not configured. Please check the uploaded API key file.
+        </div>
+        {% endif %}
+
+        {% if not gemini_available %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle"></i>
+            <strong>Gemini AI Not Configured:</strong> AI content generation features are disabled. Set GEMINI_API_KEY environment variable to enable.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

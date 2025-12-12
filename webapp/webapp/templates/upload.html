@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Content - Upload-Post AI WebApp{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-upload"></i> Upload Content
+            </h2>
+            <p class="lead">Upload your content to multiple social media platforms</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-4" id="uploadTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="video-tab" data-bs-toggle="tab" data-bs-target="#video" type="button" role="tab">
+                            <i class="fas fa-video"></i> Video
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">
+                            <i class="fas fa-images"></i> Photos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab">
+                            <i class="fas fa-edit"></i> Text
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="uploadTabContent">
+                    <!-- Video Upload Tab -->
+                    <div class="tab-pane fade show active" id="video" role="tabpanel">
+                        <form id="videoUploadForm" class="upload-form">
+                            <div class="mb-3">
+                                <label for="videoUser" class="form-label">User</label>
+                                <input type="text" class="form-control" id="videoUser" name="user" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="videoTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="videoTitle" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="videoFile" class="form-label">Video File</label>
+                                <input type="file" class="form-control" id="videoFile" name="file" accept="video/*" required>
+                                <div class="form-text">Allowed formats: MP4, AVI, MOV, WMV, FLV, MKV</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Platforms</label>
+                                <div id="videoPlatforms" class="platform-checkboxes">
+                                    <!-- Platforms will be loaded dynamically -->
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Video
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Photos Upload Tab -->
+                    <div class="tab-pane fade" id="photos" role="tabpanel">
+                        <form id="photosUploadForm" class="upload-form">
+                            <div class="mb-3">
+                                <label for="photosUser" class="form-label">User</label>
+                                <input type="text" class="form-control" id="photosUser" name="user" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="photosTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="photosTitle" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="photosCaption" class="form-label">Caption (Optional)</label>
+                                <textarea class="form-control" id="photosCaption" name="caption" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="photosFiles" class="form-label">Photo Files</label>
+                                <input type="file" class="form-control" id="photosFiles" name="files" accept="image/*" multiple required>
+                                <div class="form-text">Allowed formats: JPG, JPEG, PNG, GIF, BMP, WebP</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Platforms</label>
+                                <div id="photosPlatforms" class="platform-checkboxes">
+                                    <!-- Platforms will be loaded dynamically -->
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-images"></i> Upload Photos
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Text Upload Tab -->
+                    <div class="tab-pane fade" id="text" role="tabpanel">
+                        <form id="textUploadForm" class="upload-form">
+                            <div class="mb-3">
+                                <label for="textUser" class="form-label">User</label>
+                                <input type="text" class="form-control" id="textUser" name="user" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="textContent" class="form-label">Text Content</label>
+                                <textarea class="form-control" id="textContent" name="title" rows="4" placeholder="Enter your text post content..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Platforms</label>
+                                <div id="textPlatforms" class="platform-checkboxes">
+                                    <!-- Platforms will be loaded dynamically -->
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-edit"></i> Post Text
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not upload_available %}
+        <div class="alert alert-warning mt-4">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Upload Service Unavailable:</strong> Upload-Post API key not configured.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-spinner fa-spin"></i> Uploading...
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+                <p class="text-center mt-3">Please wait while your content is being uploaded...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load platforms when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadPlatforms();
+    setupFormHandlers();
+});
+
+function loadPlatforms() {
+    fetch('/api/platforms')
+        .then(response => response.json())
+        .then(data => {
+            // Populate video platforms
+            const videoPlatforms = document.getElementById('videoPlatforms');
+            data.video.forEach(platform => {
+                videoPlatforms.innerHTML += createPlatformCheckbox(platform, 'video');
+            });
+            
+            // Populate photos platforms
+            const photosPlatforms = document.getElementById('photosPlatforms');
+            data.photos.forEach(platform => {
+                photosPlatforms.innerHTML += createPlatformCheckbox(platform, 'photos');
+            });
+            
+            // Populate text platforms
+            const textPlatforms = document.getElementById('textPlatforms');
+            data.text.forEach(platform => {
+                textPlatforms.innerHTML += createPlatformCheckbox(platform, 'text');
+            });
+        })
+        .catch(error => console.error('Error loading platforms:', error));
+}
+
+function createPlatformCheckbox(platform, type) {
+    return `
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="${type}_${platform}" name="platforms[]" value="${platform}">
+            <label class="form-check-label" for="${type}_${platform}">${platform}</label>
+        </div>
+    `;
+}
+
+function setupFormHandlers() {
+    // Video form
+    document.getElementById('videoUploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleUpload('video');
+    });
+    
+    // Photos form
+    document.getElementById('photosUploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleUpload('photos');
+    });
+    
+    // Text form
+    document.getElementById('textUploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleUpload('text');
+    });
+}
+
+function handleUpload(type) {
+    const form = document.getElementById(`${type}UploadForm`);
+    const formData = new FormData(form);
+    formData.append('type', type);
+    
+    // Show progress modal
+    const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+    progressModal.show();
+    
+    fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        progressModal.hide();
+        if (data.success) {
+            alert('Upload successful!');
+            form.reset();
+        } else {
+            alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        progressModal.hide();
+        console.error('Upload error:', error);
+        alert('Upload failed: ' + error.message);
+    });
+}
+</script>
+{% endblock %}
